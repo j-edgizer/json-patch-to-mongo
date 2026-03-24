@@ -1,5 +1,5 @@
 module github.com/ZaninAndrea/json-patch-to-mongo
 
-go 1.14
+go 1.18
 
-require go.mongodb.org/mongo-driver v1.4.2
+require go.mongodb.org/mongo-driver/v2 v2.5.0

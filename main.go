@@ -9,8 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func main() {
@@ -104,7 +103,7 @@ func ParsePatchesWithPrefix(patches []byte, prefixPath string) (bson.M, bool, er
 					if update["$push"].(bson.M)[key] == nil {
 						val := bson.A{update["$push"].(bson.M)[key]}
 						update["$push"].(bson.M)[key] = bson.M{"$each": val}
-					} else if fmt.Sprintf("%T", update["$push"].(bson.M)[key]) != "primitive.M" {
+					} else if fmt.Sprintf("%T", update["$push"].(bson.M)[key]) != "bson.M" {
 						val := bson.A{update["$push"].(bson.M)[key]}
 						update["$push"].(bson.M)[key] = bson.M{"$each": val}
 					} else if _, ok := update["$push"].(bson.M)[key].(bson.M)["$each"]; !ok {
@@ -149,7 +148,7 @@ func ParsePatchesWithPrefix(patches []byte, prefixPath string) (bson.M, bool, er
 
 					if _, ok := update["$push"].(bson.M)[key]; ok {
 						// Return error if previous operations added to the end of the array
-						if update["$push"].(bson.M)[key] == nil || fmt.Sprintf("%T", update["$push"].(bson.M)[key]) != "primitive.M" {
+						if update["$push"].(bson.M)[key] == nil || fmt.Sprintf("%T", update["$push"].(bson.M)[key]) != "bson.M" {
 							return nil, false, fmt.Errorf("Unsupported Operation! can't use add op with mixed positions")
 						} else if _, ok := update["$push"].(bson.M)[key].(bson.M)["$position"]; !ok {
 							return nil, false, fmt.Errorf("Unsupported Operation! can't use add op with mixed positions")
@@ -157,7 +156,7 @@ func ParsePatchesWithPrefix(patches []byte, prefixPath string) (bson.M, bool, er
 
 						// The items inserted must be in contigous positions
 						posDiff := position - update["$push"].(bson.M)[key].(bson.M)["$position"].(int)
-						if posDiff > len(update["$push"].(bson.M)[key].(bson.M)["$each"].(primitive.A)) {
+						if posDiff > len(update["$push"].(bson.M)[key].(bson.M)["$each"].(bson.A)) {
 							return nil, false, fmt.Errorf("Unsupported Operation! can use add op only with contiguous positions")
 						}
 
